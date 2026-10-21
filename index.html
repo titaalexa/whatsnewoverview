@@ -30,13 +30,16 @@ header{background:var(--surface);border-bottom:1px solid var(--line);position:st
 .tabs button[aria-selected=true]{background:#fff;color:#0f1a14}
 .dot{width:7px;height:7px;border-radius:50%;background:#4be08f;animation:p 1.6s infinite}.seen .dot{animation:none;opacity:.5}
 @keyframes p{50%{box-shadow:0 0 0 5px rgba(75,224,143,0)}0%{box-shadow:0 0 0 0 rgba(75,224,143,.6)}}
-.stage{position:relative}.vp{overflow:hidden;border-radius:14px}
+.stage{position:relative;margin-right:-30px}.vp{overflow:hidden;touch-action:pan-y;cursor:grab;user-select:none}.vp:active{cursor:grabbing}
 .nav{position:absolute;top:50%;width:32px;height:32px;margin-top:-16px;border-radius:50%;background:#fff;color:#0f1a14;font-size:18px;line-height:1;display:grid;place-items:center;box-shadow:0 4px 14px rgba(0,0,0,.3);z-index:2;transition:opacity .4s,transform .4s cubic-bezier(.22,1,.36,1)}
 .nav:hover{transform:scale(1.1)}.nav:active{transform:scale(.94)}.nav[disabled]{opacity:0;pointer-events:none}
 .sl>.rc{height:100%}
-.pv{left:-16px}.nx{right:-16px}
-.tr{display:flex;align-items:stretch;transition:transform .35s ease}
-.sl{flex:0 0 100%;min-width:0;padding:2px}
+.pv{left:-16px}.nx{left:calc(88% - 10px)}
+.tr{display:flex;align-items:stretch;gap:12px;transition:transform .7s cubic-bezier(.22,1,.36,1);will-change:transform}
+.sl{flex:0 0 88%;min-width:0;opacity:.45;transform:scale(.95);transform-origin:left center;transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1)}.sl.on{opacity:1;transform:none}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.on li{animation:rise .6s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--n)*55ms + 120ms)}.on h3,.on .rm,.on .rc p,.on .fc,.on .doc{animation:rise .6s cubic-bezier(.22,1,.36,1) both}
+.on .fc:nth-child(2){animation-delay:.07s}.on .fc:nth-child(3){animation-delay:.14s}.on .doc{animation-delay:.1s}
 .s0{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .fc{display:flex;gap:10px;background:var(--lc);color:var(--lct);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:11px;color:var(--lcm)}
 .fc:last-child{margin-bottom:0}.fc b{display:block;font-size:12px;color:var(--lct)}.fc i{font-style:normal;width:26px;height:26px;border-radius:8px;background:var(--gl);color:var(--g);display:grid;place-items:center;flex:none}
@@ -69,7 +72,7 @@ footer{background:var(--surface);border-top:1px solid var(--line)}
 .fi h6{margin:0 0 8px;font-size:10.5px;letter-spacing:.12em}.fi a{display:block;color:var(--mute);margin-bottom:6px}
 .copy{max-width:1000px;margin:auto;padding:0 20px 20px;color:var(--mute);font-size:11px}
 @media(max-width:780px){.split{grid-template-columns:minmax(0,1fr)}.fi{grid-template-columns:1fr 1fr}.r{padding:32px 20px}.s0{grid-template-columns:1fr}.doc{margin-top:30px}}
-@media(prefers-reduced-motion:reduce){.tr{transition:none}.dot{animation:none}}
+@media(prefers-reduced-motion:reduce){.tr,.sl{transition:none}.dot,.on li,.on h3,.on .rm,.on .rc p,.on .fc,.on .doc{animation:none}}
 </style></head><body>
 <header><div class="bar"><span class="brand"><span class="logo">T</span>T201</span><span class="sp"></span><button class="pill">Sign In</button><button class="pill pri">Sign Up</button><button class="pill" id="theme" aria-label="Toggle theme">◐</button></div></header>
 <main class="wrap"><div class="split">
@@ -102,12 +105,12 @@ const R=[
 {v:"1.5.3",d:"Oct 6, 2026",t:"Salary history and document reminders",sum:"Clearer expiry reminders for HR documents.",new:["Expiry badges for HR documents, such as Due in 14 days"],imp:["Salary history table is easier to scan"],fix:["Fixed audit trail showing the wrong time zone"]},
 {v:"1.5.0",d:"Sep 18, 2026",t:"Company Policies page",sum:"Read company memos and acknowledge them in one place.",new:["Company Policies page with required acknowledgment"],imp:["Cleaner dashboard layout"],fix:[]}];
 const $=id=>document.getElementById(id),tr=$("tr"),vp=$("vp");
-const rows=(k,c,a)=>a.map(x=>`<li><i class="k ${c}">${k}</i><span>${x}</span></li>`).join("");
-tr.insertAdjacentHTML("beforeend",R.map((r,n)=>`<div class="sl"><div class="rc"><div class="rm">${n?"":'<span class="tg">Latest</span>'}<b>T201 v${r.v}</b>· ${r.d}<span class="cnt">${n+1} of ${R.length}</span></div><h3>${r.t}</h3><p>${r.sum}</p><ul>${rows("New","c-new",r.new)}${rows("Improved","c-imp",r.imp)}${rows("Fixed","c-fix",r.fix)}</ul></div></div>`).join(""));
+const rows=(k,c,a,o)=>a.map((x,j)=>`<li style="--n:${o+j}"><i class="k ${c}">${k}</i><span>${x}</span></li>`).join("");
+tr.insertAdjacentHTML("beforeend",R.map((r,n)=>`<div class="sl"><div class="rc"><div class="rm">${n?"":'<span class="tg">Latest</span>'}<b>T201 v${r.v}</b>· ${r.d}<span class="cnt">${n+1} of ${R.length}</span></div><h3>${r.t}</h3><p>${r.sum}</p><ul>${rows("New","c-new",r.new,0)}${rows("Improved","c-imp",r.imp,r.new.length)}${rows("Fixed","c-fix",r.fix,r.new.length+r.imp.length)}</ul></div></div>`).join(""));
 const sl=[...tr.children],N=sl.length;let i=0;
 function fit(){tr.style.alignItems="flex-start";vp.style.height="auto";const h=Math.max(...sl.map(s=>s.offsetHeight));tr.style.alignItems="";vp.style.height=h+"px"}
-function go(n){i=Math.max(0,Math.min(n,N-1));tr.style.transform=`translateX(-${i*100}%)`;
-sl.forEach((s,k)=>k===i?s.removeAttribute("inert"):s.setAttribute("inert",""));
+function go(n){i=Math.max(0,Math.min(n,N-1));tr.style.transform=`translateX(${-sl[i].offsetLeft}px)`;
+sl.forEach((s,k)=>{s.classList.toggle("on",k===i);s.setAttribute("aria-hidden",k!==i)});
 
 $("t0").setAttribute("aria-selected",i===0);$("t1").setAttribute("aria-selected",i>0);
 $("prev").disabled=i===0;$("next").disabled=i===N-1;
@@ -115,7 +118,10 @@ if(i>0)$("t1").classList.add("seen"),$("t1").closest(".tabs").classList.add("see
 $("t0").onclick=()=>go(0);$("t1").onclick=()=>go(i>0?i:1);
 $("prev").onclick=()=>go(i-1);$("next").onclick=()=>go(i+1);
 vp.onkeydown=e=>{if(e.key==="ArrowRight")go(i+1);if(e.key==="ArrowLeft")go(i-1)};
-let x0=null;vp.onpointerdown=e=>x0=e.clientX;vp.onpointerup=e=>{if(x0!==null&&Math.abs(e.clientX-x0)>50)go(i+(e.clientX<x0?1:-1));x0=null};
+let dx=0,sx=0,t0=0,drag=false,base=0;sl.forEach((s,k)=>s.onclick=()=>{if(Math.abs(dx)<5&&k!==i)go(k)});
+vp.onpointerdown=e=>{drag=true;sx=e.clientX;dx=0;t0=performance.now();base=-sl[i].offsetLeft;tr.style.transition="none";vp.setPointerCapture(e.pointerId)};
+vp.onpointermove=e=>{if(!drag)return;dx=e.clientX-sx;const off=(i===0&&dx>0)||(i===N-1&&dx<0)?dx*.3:dx;tr.style.transform=`translateX(${base+off}px)`};
+vp.onpointerup=vp.onpointercancel=()=>{if(!drag)return;drag=false;tr.style.transition="";const v=dx/Math.max(1,performance.now()-t0);go(dx<-50||v<-.4?i+1:dx>50||v>.4?i-1:i)};
 const re=()=>{fit();go(i)};addEventListener("resize",re);addEventListener("load",re);document.fonts&&document.fonts.ready.then(re);fit();go(0);
 $("theme").onclick=()=>{const d=document.documentElement,c=d.dataset.theme||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");d.dataset.theme=c==="dark"?"light":"dark"};
 </script></body></html>
